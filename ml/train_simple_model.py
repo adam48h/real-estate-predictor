@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 # 1. Load dataset
-df = pd.read_csv("../data/AmesHousing.csv")
+df = pd.read_csv("data/AmesHousing.csv")
 
 # 2. Create bathroom feature
 df["Bathrooms"] = (

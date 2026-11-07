@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [property, setProperty] = useState({
-  address: "",
+
+const [property, setProperty] = useState({
   bedrooms: "",
   bathrooms: "",
   squareFeet: "",
@@ -15,37 +15,69 @@ const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
 
 const [error, setError] = useState("");
 
-function handleEstimate() {
+const [loading, setLoading] = useState(false);
+
+
+async function handleEstimate() {
   const sqft = Number(property.squareFeet);
   const bedrooms = Number(property.bedrooms);
   const bathrooms = Number(property.bathrooms);
 
   if (
-    !property.address.trim() ||
     !property.bedrooms ||
-    !property.bathrooms ||
+    property.bathrooms === "" ||
     !property.squareFeet ||
     sqft <= 0 ||
     bedrooms < 0 ||
-    bathrooms <= 0
+    bathrooms < 0
   ) {
     setError("Please enter valid information for all property fields.");
     setEstimatedPrice(null);
     return;
   }
 
-  let price = sqft * 150;
-
-  price += bedrooms * 5000;
-  price += bathrooms * 7500;
-
-  if (property.propertyType === "Condo") price *= 0.9;
-  if (property.propertyType === "Apartment") price *= 0.85;
-  if (property.propertyType === "Townhouse") price *= 0.95;
-
+  setLoading(true);
   setError("");
-  setEstimatedPrice(Math.round(price));
+  setEstimatedPrice(null);
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/predict", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        bedrooms: bedrooms,
+        bathrooms: bathrooms,
+        squareFeet: sqft,
+        propertyType: property.propertyType,
+      }),
+    });
+
+    const data = await response.json();
+
+if (!response.ok) {
+  console.error("Backend error:", response.status, data);
+  throw new Error(
+    data.detail || data.error || `Server error: ${response.status}`
+  );
 }
+    if (typeof data.estimatedPrice !== "number") {
+      throw new Error(data.error || "Invalid prediction received.");
+    }
+
+    setEstimatedPrice(Math.round(data.estimatedPrice));
+
+  } catch (err) {
+    console.error(err);
+    setError(
+      "Unable to connect to the prediction server. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+}
+
 
  return (
     <main className = "min-h-screen bg-slate-50 text-slate-900">
@@ -75,19 +107,6 @@ function handleEstimate() {
     </p>
 
     <div className="mt-8 grid gap-5 sm:grid-cols-2">
-
-      <div className="sm:col-span-2">
-        <input
-  type="text"
-  placeholder="Enter property address"
-  value={property.address}
-  onChange={(e) =>
-    setProperty({ ...property, address: e.target.value })
-  }
-  className="mt-2 w-full rounded-lg border border-slate-300 p-3"
-/>
-      </div>
-
       <div>
         <label className="text-sm font-medium">
           Bedrooms
@@ -144,10 +163,10 @@ function handleEstimate() {
   }
   className="mt-2 w-full rounded-lg border border-slate-300 p-3"
 >
-  <option>Single Family Home</option>
-  <option>Condo</option>
-  <option>Apartment</option>
-  <option>Townhouse</option>
+<option>Single Family Home</option>
+<option>Townhouse</option>
+<option>Duplex</option>
+<option>Two-Family Home</option>
 </select>
       </div>
 
@@ -155,9 +174,10 @@ function handleEstimate() {
 
     <button
   onClick={handleEstimate}
-  className="mt-8 w-full rounded-lg bg-blue-600 p-4 font-semibold text-white hover:bg-blue-700"
+  disabled={loading}
+  className="mt-8 w-full rounded-lg bg-blue-600 p-4 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
 >
-  Estimate Property Value
+  {loading ? "Analyzing Property..." : "Estimate Property Value"}
 </button>
 
 {error && (

@@ -10,6 +10,43 @@ export default function Home() {
   squareFeet: "",
   propertyType: "Single Family Home",
 });
+
+const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
+
+const [error, setError] = useState("");
+
+function handleEstimate() {
+  const sqft = Number(property.squareFeet);
+  const bedrooms = Number(property.bedrooms);
+  const bathrooms = Number(property.bathrooms);
+
+  if (
+    !property.address.trim() ||
+    !property.bedrooms ||
+    !property.bathrooms ||
+    !property.squareFeet ||
+    sqft <= 0 ||
+    bedrooms < 0 ||
+    bathrooms <= 0
+  ) {
+    setError("Please enter valid information for all property fields.");
+    setEstimatedPrice(null);
+    return;
+  }
+
+  let price = sqft * 150;
+
+  price += bedrooms * 5000;
+  price += bathrooms * 7500;
+
+  if (property.propertyType === "Condo") price *= 0.9;
+  if (property.propertyType === "Apartment") price *= 0.85;
+  if (property.propertyType === "Townhouse") price *= 0.95;
+
+  setError("");
+  setEstimatedPrice(Math.round(price));
+}
+
  return (
     <main className = "min-h-screen bg-slate-50 text-slate-900">
      <section>
@@ -116,9 +153,34 @@ export default function Home() {
 
     </div>
 
-    <button className="mt-8 w-full rounded-lg bg-blue-600 p-4 font-semibold text-white hover:bg-blue-700">
-      Estimate Property Value
-    </button>
+    <button
+  onClick={handleEstimate}
+  className="mt-8 w-full rounded-lg bg-blue-600 p-4 font-semibold text-white hover:bg-blue-700"
+>
+  Estimate Property Value
+</button>
+
+{error && (
+  <p className="mt-4 text-red-600">
+    {error}
+  </p>
+)}
+
+{estimatedPrice !== null && (
+  <div className="mt-8 rounded-xl bg-blue-50 p-6">
+    <p className="text-sm font-medium text-blue-700">
+      Estimated Property Value
+    </p>
+
+    <h3 className="mt-2 text-4xl font-bold text-slate-900">
+      ${estimatedPrice.toLocaleString("en-US")}
+    </h3>
+
+    <p className="mt-2 text-sm text-slate-500">
+      Preliminary estimate based on the property details provided.
+    </p>
+  </div>
+)}
 
   </div>
 </section>

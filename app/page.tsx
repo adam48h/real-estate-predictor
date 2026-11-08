@@ -80,7 +80,16 @@ if (!response.ok) {
 
 
  return (
-    <main className = "min-h-screen bg-slate-50 text-slate-900">
+    <main
+
+    
+  className="min-h-screen bg-cover bg-center bg-fixed text-white"
+  style={{
+    backgroundImage:
+      "linear-gradient(rgba(15, 23, 42, 0.60), rgba(15, 23, 42, 0.60)), url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmurQ82vgozU-Qs0p_0pQY2V9y0dkFg2d6c7jTTMiEyQ&s=10')",
+  }}
+>
+  
      <section>
          <p>Home Evaluation</p>
          <h1 className = "text-5xl font-bold tracking-tight">
@@ -89,14 +98,14 @@ if (!response.ok) {
          </h1>
 
          <p>
-         Receives perfectly on point evalutions on homes through the use of AI and data from the real estate market
+         Receives perfectly on point evaluations on homes through the use of AI and data from the Iowa real estate market
         </p>
     
     
     </section>
 
     <section className="mx-auto max-w-3xl px-6 py-20">
-  <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+  <div className="rounded-2xl border border-slate-200 bg-white p-8 text-slate-900 shadow-2xl">
 
     <h2 className="text-2xl font-bold">
       Evaluate Your Property
